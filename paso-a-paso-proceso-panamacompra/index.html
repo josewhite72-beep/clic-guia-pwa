@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Paso a Paso Proceso PanamaCompra</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Paso a Paso Proceso PanamaCompra" />
+  <meta property="og:description" content="Guía interactiva paso a paso" />
+  <meta property="og:url" content="https://clic-guia-pwa.vercel.app/paso-a-paso-proceso-panamacompra/" />
+  <meta property="og:image" content="https://clic-guia-pwa.vercel.app/paso-a-paso-proceso-panamacompra/icon-512.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0f172a;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.app{min-height:100dvh;display:flex;flex-direction:column}.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;background:#1e293b;border-bottom:1px solid #334155}.bar h1{margin:0;font-size:1.1rem}.status{color:#94a3b8;margin-left:auto}.controls{display:flex;gap:8px}button{border:0;border-radius:12px;padding:10px 14px;background:#334155;color:#fff;cursor:pointer;font:inherit}button:hover{background:#475569}.stage{flex:1;display:grid;place-items:center;padding:24px;overflow:hidden}.book{width:min(92vw,520px);aspect-ratio:3/4;position:relative;perspective:2200px;transform-style:preserve-3d;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}.page{position:absolute;inset:0;transform-origin:left center;transition:transform .65s ease;transform-style:preserve-3d}.page.flipped{transform:rotateY(-180deg)}.face{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;background:#fff;overflow:hidden;border-radius:6px;box-shadow:0 10px 30px rgb(0 0 0/.3)}.face.back{transform:rotateY(180deg);background:#dedede}.face img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}.empty{color:#0f172a;background:#fff;padding:1rem;border-radius:8px;text-align:center}.hint{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#0ea5e9;color:#04222e;font-weight:600;padding:10px 18px;border-radius:999px;box-shadow:0 8px 24px rgb(0 0 0/.4);animation:p 1.6s infinite;z-index:20;pointer-events:none}@keyframes p{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.06)}}
+</style>
+</head>
+<body>
+<main class="app">
+<header class="bar">
+<h1>Paso a Paso Proceso PanamaCompra</h1>
+<span id="status" class="status"></span>
+<div class="controls"><button id="prev">←</button><button id="next">→</button></div>
+</header>
+<section class="stage"><div id="book" class="book"></div></section>
+</main>
+<div id="hint" class="hint">👆 Toca la imagen para avanzar</div>
+  <script>
+    if ("serviceWorker" in navigator) { window.addEventListener("load", function () { navigator.serviceWorker.register("./sw.js").catch(function () {}); }); }
+  </script>
+<script>
+(function(){
+const PAGES=[{"src":"assets/page-001.webp"},{"src":"assets/page-002.webp"},{"src":"assets/page-003.webp"},{"src":"assets/page-004.webp"},{"src":"assets/page-005.webp"},{"src":"assets/page-006.webp"},{"src":"assets/page-007.webp"}];
+const book=document.getElementById("book"),status=document.getElementById("status"),hint=document.getElementById("hint");
+let current=0,startX=null;
+function render(){book.innerHTML="";PAGES.forEach(function(page,index){var el=document.createElement("div");el.className="page";var f=document.createElement("div");f.className="face front";var img=document.createElement("img");img.src=page.src;img.alt="Página "+(index+1);img.draggable=false;f.appendChild(img);var b=document.createElement("div");b.className="face back";el.appendChild(f);el.appendChild(b);book.appendChild(el);});update();}
+function update(){var els=Array.from(book.children);els.forEach(function(el,i){var fl=i<current;el.classList.toggle("flipped",fl);el.style.zIndex=fl?i+1:PAGES.length*2-i;});if(!PAGES.length){status.textContent="Sin páginas";return;}status.textContent="Página "+Math.min(current+1,PAGES.length)+" de "+PAGES.length;if(hint)hint.style.display=current===0?"":"none";}
+function next(){if(current<PAGES.length){current++;update();}}
+function prev(){if(current>0){current--;update();}}
+book.addEventListener("pointerdown",function(e){startX=e.clientX;});
+book.addEventListener("pointerup",function(e){if(startX===null)return;var dx=e.clientX-startX;startX=null;if(Math.abs(dx)>40){if(dx<0)next();else prev();return;}var r=book.getBoundingClientRect();if(e.clientX-r.left<r.width*0.3)prev();else next();});
+document.getElementById("next").addEventListener("click",next);
+document.getElementById("prev").addEventListener("click",prev);
+document.addEventListener("keydown",function(e){if(e.key==="ArrowRight")next();if(e.key==="ArrowLeft")prev();});
+if(!PAGES.length){book.innerHTML='<p class="empty">Sin páginas</p>';status.textContent="Sin páginas";if(hint)hint.style.display="none";return;}
+render();
+})();
+</script>
+</body>
+</html>
