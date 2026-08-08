@@ -1,4 +1,4 @@
-const CACHE_NAME = "clicguia-v1";
+const CACHE_NAME = "clicguia-v2";
 
 const ASSETS = [
   "./",
@@ -11,8 +11,7 @@ const ASSETS = [
   "./exporter.js",
   "./share.js",
   "./manifest.webmanifest",
-  "./icons/icon.svg",
-  "https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"
+  "./icons/icon.svg"
 ];
 
 self.addEventListener("install", (event) => {
@@ -43,19 +42,9 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
 
-  if (url.origin !== location.origin) {
-    event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached;
-        return fetch(request).then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          return response;
-        });
-      })
-    );
-    return;
-  }
+  // No interceptamos recursos externos (CDN del QR):
+  // el navegador los cachea con sus propias cabeceras.
+  if (url.origin !== location.origin) return;
 
   event.respondWith(
     fetch(request)

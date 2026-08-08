@@ -17,9 +17,46 @@ export function buildShareUrl(baseUrl, slug) {
   return b ? `${b}/${slug}/` : "";
 }
 
+const QR_SOURCES = [
+  "https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js",
+  "https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"
+];
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error("No se pudo cargar " + src));
+    document.head.appendChild(s);
+  });
+}
+
+async function ensureQR() {
+  if (window.QRCode) return;
+
+  for (const src of QR_SOURCES) {
+    try {
+      await loadScript(`${src}?cb=${Date.now()}`);
+      if (window.QRCode) return;
+    } catch (e) {
+      console.warn("CDN de QR falló:", src, e);
+    }
+  }
+
+  if (!window.QRCode) {
+    throw new Error("No se pudo cargar el generador de QR. Revisa tu conexión y vuelve a intentarlo.");
+  }
+}
+
 export async function qrDataUrl(text, size = 600) {
-  if (!window.QRCode) throw new Error("Generador de QR no disponible. Conéctate una vez a internet.");
-  return await QRCode.toDataURL(text, { width: size, margin: 1, color: { dark: "#0f172a", light: "#ffffff" } });
+  await ensureQR();
+
+  return await QRCode.toDataURL(text, {
+    width: size,
+    margin: 1,
+    color: { dark: "#0f172a", light: "#ffffff" }
+  });
 }
 
 export async function downloadQrPng(text, filename) {
