@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>ClicGuía</title>
+
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="stylesheet" href="./styles.css" />
+
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body>
+  <main id="app">
+
+    <!-- HOME -->
+    <section id="homeView" class="view">
+      <header class="topbar brand">
+        <h1>👆 ClicGuía</h1>
+      </header>
+
+      <section class="content">
+        <div class="hero">
+          <p>
+            Convierte guías paso a paso en
+            <b>imágenes clicables</b>, enlaces y códigos QR.
+          </p>
+        </div>
+
+        <div class="actions">
+          <label class="button primary">
+            Nueva guía (imágenes)
+            <input id="newImagesInput" type="file" accept="image/*" multiple hidden />
+          </label>
+
+          <label class="button">
+            Importar HTML exportado
+            <input id="importHtmlInput" type="file" accept=".html,text/html" hidden />
+          </label>
+        </div>
+
+        <h2>Mis guías</h2>
+        <ul id="guideList" class="list"></ul>
+      </section>
+    </section>
+
+    <!-- EDITOR -->
+    <section id="editorView" class="view" hidden>
+      <header class="topbar">
+        <button id="backHomeBtn" type="button">←</button>
+        <input id="titleInput" class="title-input" placeholder="Título de la guía" />
+        <button id="shareBtn" type="button" class="primary">Compartir</button>
+      </header>
+
+      <section class="content">
+        <div class="toolbar">
+          <label class="button">
+            Añadir imágenes
+            <input id="addImagesInput" type="file" accept="image/*" multiple hidden />
+          </label>
+          <button id="viewBtn" type="button">Ver</button>
+          <span id="pageCount" class="muted"></span>
+        </div>
+
+        <div id="thumbs" class="thumbs"></div>
+      </section>
+    </section>
+
+    <!-- VISOR -->
+    <section id="viewerView" class="view" hidden>
+      <header class="topbar">
+        <button id="closeViewerBtn" type="button">←</button>
+        <span id="pageStatus" class="muted"></span>
+        <div class="controls">
+          <button id="prevBtn" type="button">←</button>
+          <button id="nextBtn" type="button">→</button>
+        </div>
+      </header>
+
+      <section class="stage">
+        <div id="book" class="book"></div>
+      </section>
+    </section>
+
+    <!-- COMPARTIR -->
+    <section id="shareView" class="view" hidden>
+      <header class="topbar">
+        <button id="backEditorBtn" type="button">←</button>
+        <h1>Compartir</h1>
+      </header>
+
+      <section class="content">
+        <label class="field">
+          <span>Tu base pública (Vercel)</span>
+          <input id="baseUrlInput" placeholder="https://tu-app.vercel.app/guias" />
+        </label>
+
+        <label class="field">
+          <span>Enlace de la guía</span>
+          <div class="row">
+            <input id="linkInput" readonly />
+            <button id="copyBtn" type="button">Copiar</button>
+          </div>
+        </label>
+
+        <div class="grid">
+          <button id="qrBtn" type="button">⬇ QR (PNG)</button>
+          <button id="coverBtn" type="button">⬇ Portada clicable (PNG)</button>
+          <button id="htmlBtn" type="button">⬇ HTML offline</button>
+          <button id="zipBtn" type="button">⬇ ZIP publicable</button>
+        </div>
+
+        <p class="muted small">
+          Sube el contenido del ZIP a <b>guias/&lt;nombre-de-la-guía&gt;/</b>
+          en tu repo de GitHub. Vercel desplegará el enlace automáticamente.
+        </p>
+      </section>
+    </section>
+
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
