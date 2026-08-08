@@ -17,52 +17,59 @@ export function buildShareUrl(baseUrl, slug) {
   return b ? `${b}/${slug}/` : "";
 }
 
-const QR_SOURCES = [
-  "https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js",
-  "https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"
-];
-
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    const s = document.createElement("script");
-    s.src = src;
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error("No se pudo cargar " + src));
-    document.head.appendChild(s);
-  });
-}
+let qrModule = null;
 
 async function ensureQR() {
-  if (window.QRCode) return;
-
-  for (const src of QR_SOURCES) {
-    try {
-      await loadScript(`${src}?cb=${Date.now()}`);
-      if (window.QRCode) return;
-    } catch (e) {
-      console.warn("CDN de QR falló:", src, e);
-    }
+  if (window.QRCode || qrModule) return;
+  try {
+    qrModule = await import("https://cdn.jsdelivr.net/npm/qrcode@1.5.3/+esm");
+  } catch (e) {
+    console.warn("No se pudo importar el generador de QR:", e);
   }
+}
 
-  if (!window.QRCode) {
-    throw new Error("No se pudo cargar el generador de QR. Revisa tu conexión y vuelve a intentarlo.");
-  }
+function qrOptions(size) {
+  return {
+    width: size,
+    margin: 1,
+    color: { dark: "#0f172a", light: "#ffffff" }
+  };
 }
 
 export async function qrDataUrl(text, size = 600) {
   await ensureQR();
 
-  return await QRCode.toDataURL(text, {
-    width: size,
-    margin: 1,
-    color: { dark: "#0f172a", light: "#ffffff" }
-  });
+  if (window.QRCode?.toDataURL) {
+    return await QRCode.toDataURL(text, qrOptions(size));
+  }
+
+  const mod = qrModule?.toDataURL ? qrModule : qrModule?.default;
+  if (mod?.toDataURL) {
+    return await mod.toDataURL(text, qrOptions(size));
+  }
+
+  const api = "https://api.qrserver.com/v1/create-qr-code/" +
+    `?size=${size}x${size}&qzone=1&data=${encodeURIComponent(text)}`;
+
+  const res = await fetch(api);
+  if (!res.ok) throw new Error("No se pudo generar el QR. Revisa tu conexión.");
+
+  return await blobToDataUrl(await res.blob());
 }
 
 export async function downloadQrPng(text, filename) {
   const dataUrl = await qrDataUrl(text);
   const blob = await (await fetch(dataUrl)).blob();
   downloadBlob(blob, filename);
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(String(r.result));
+    r.onerror = () => rej(r.error);
+    r.readAsDataURL(blob);
+  });
 }
 
 function loadImage(src) {
