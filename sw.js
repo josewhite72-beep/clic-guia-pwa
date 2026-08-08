@@ -1,4 +1,4 @@
-const CACHE_NAME = "clicguia-v2";
+const CACHE_NAME = "clicguia-v4";
 
 const ASSETS = [
   "./",
